@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>L'Espace des Doubles & Moitiés</title>
+    <title>L'Espace Mathématique</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -53,10 +53,20 @@
             padding: 10px 30px;
             border-radius: 15px;
             border: 2px solid white;
-            font-size: 1.5rem;
-            font-weight: bold;
+            text-align: center;
             box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
             pointer-events: none;
+        }
+        #target-instruction {
+            display: block;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            opacity: 0.9;
+            margin-bottom: -5px;
+        }
+        #target-value {
+            font-size: 2rem;
+            font-weight: bold;
         }
         .hidden { display: none !important; }
 
@@ -111,18 +121,27 @@
         </div>
 
         <div id="target-display" class="target-box hidden">
-            CIBLE : <span id="target-value">--</span>
+            <span id="target-instruction">TROUVE LE DOUBLE DE</span>
+            <span id="target-value">--</span>
         </div>
 
         <div id="overlay" class="absolute inset-0 bg-black/80 flex items-center justify-center pointer-events-auto">
             <div class="bg-gray-900 p-8 rounded-3xl border-2 border-red-500 max-w-md w-full mx-4 shadow-2xl text-center">
-                <h1 id="overlay-title" class="text-4xl font-black text-red-500 mb-4 tracking-widest">ESPACE DOUBLES</h1>
+                <h1 id="overlay-title" class="text-4xl font-black text-red-500 mb-4 tracking-widest uppercase">Espace Maths</h1>
                 <p id="overlay-msg" class="text-gray-300 mb-8 leading-relaxed">
-                    Détruis les astéroïdes qui correspondent au <b>Double</b> ou à la <b>Moitié</b> du nombre affiché !
+                    Détruis les astéroïdes qui correspondent à la consigne affichée !
                 </p>
                 
+                <div class="mb-6">
+                    <label class="block text-sm text-gray-500 mb-2 uppercase tracking-tighter">Mode de jeu</label>
+                    <select id="game-mode" class="bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2 w-full focus:outline-none focus:border-red-500">
+                        <option value="doubles">Doubles & Moitiés</option>
+                        <option value="friends10">Les Amis de 10</option>
+                    </select>
+                </div>
+
                 <div class="mb-8">
-                    <label class="block text-sm text-gray-500 mb-2 uppercase tracking-tighter">Niveau de difficulté</label>
+                    <label class="block text-sm text-gray-500 mb-2 uppercase tracking-tighter">Difficulté</label>
                     <select id="diff-select" class="bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2 w-full focus:outline-none focus:border-red-500">
                         <option value="easy">Recrue (1-10)</option>
                         <option value="medium" selected>Pilote (1-20)</option>
@@ -156,8 +175,10 @@
         const startBtn = document.getElementById('start-btn');
         const homeBtn = document.getElementById('home-btn');
         const diffSelect = document.getElementById('diff-select');
+        const modeSelect = document.getElementById('game-mode');
         const targetDisplay = document.getElementById('target-display');
         const targetValEl = document.getElementById('target-value');
+        const targetInstEl = document.getElementById('target-instruction');
         const touchControls = document.getElementById('touch-controls');
         const fireBtn = document.getElementById('fire-btn');
 
@@ -227,6 +248,7 @@
         let meteorTimer = 0;
         let meteorInterval = 2000;
         let currentTarget = 0;
+        let currentTargetType = ''; // 'double', 'half', 'friend10'
         
         const DIFFICULTY_SETTINGS = {
             easy: { max: 10, interval: 2500, speed: 1.5 },
@@ -241,9 +263,7 @@
             h: 50,
             speed: 8,
             movingLeft: false,
-            movingRight: false,
-            movingUp: false,
-            movingDown: false
+            movingRight: false
         };
 
         const meteors = [];
@@ -257,9 +277,14 @@
             document.addEventListener('keydown', (e) => handleKey(e, true));
             document.addEventListener('keyup', (e) => handleKey(e, false));
             
-            // Écouteurs Tactiles
+            // Écouteurs Tactiles : Zones gauche/droite
             canvas.addEventListener('touchstart', handleTouch, { passive: false });
             canvas.addEventListener('touchmove', handleTouch, { passive: false });
+            canvas.addEventListener('touchend', () => {
+                player.movingLeft = false;
+                player.movingRight = false;
+            });
+
             fireBtn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 if (gameState === 'PLAYING') fire();
@@ -270,33 +295,27 @@
             e.preventDefault();
             if (gameState !== 'PLAYING') return;
             const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            // Positionnement du vaisseau : le centre du vaisseau suit le doigt, 
-            // avec un léger décalage vertical pour ne pas cacher le vaisseau sous le doigt
-            player.x = touch.clientX - rect.left - player.w / 2;
-            player.y = touch.clientY - rect.top - player.h - 40; 
+            const middleX = window.innerWidth / 2;
 
-            // Limites de l'écran
-            if (player.x < 0) player.x = 0;
-            if (player.x > canvas.width - player.w) player.x = canvas.width - player.w;
-            if (player.y < 50) player.y = 50;
-            if (player.y > canvas.height - player.h) player.y = canvas.height - player.h;
+            if (touch.clientX < middleX) {
+                player.movingLeft = true;
+                player.movingRight = false;
+            } else {
+                player.movingRight = true;
+                player.movingLeft = false;
+            }
         }
 
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            if (gameState === 'START') {
-                player.x = canvas.width / 2 - player.w / 2;
-                player.y = canvas.height - 100;
-            }
+            player.x = canvas.width / 2 - player.w / 2;
+            player.y = canvas.height - 100;
         }
 
         function handleKey(e, isPressed) {
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') player.movingLeft = isPressed;
             if (e.code === 'ArrowRight' || e.code === 'KeyD') player.movingRight = isPressed;
-            if (e.code === 'ArrowUp' || e.code === 'KeyW') player.movingUp = isPressed;
-            if (e.code === 'ArrowDown' || e.code === 'KeyS') player.movingDown = isPressed;
             if (isPressed && e.code === 'Space' && gameState === 'PLAYING') fire();
         }
 
@@ -313,26 +332,52 @@
 
         function generateNewTarget() {
             const config = DIFFICULTY_SETTINGS[diffSelect.value];
-            const possible = [];
-            for (let i = 2; i <= config.max; i++) {
-                possible.push(i);
+            const mode = modeSelect.value;
+            
+            if (mode === 'doubles') {
+                const possible = [];
+                for (let i = 2; i <= config.max; i++) possible.push(i);
+                currentTarget = possible[Math.floor(Math.random() * possible.length)];
+                
+                // Choisir au hasard entre chercher le double ou la moitié (si pair)
+                if (currentTarget % 2 === 0 && Math.random() > 0.5) {
+                    currentTargetType = 'half';
+                    targetInstEl.textContent = "Trouve la moitié de";
+                } else {
+                    currentTargetType = 'double';
+                    targetInstEl.textContent = "Trouve le double de";
+                }
+            } else {
+                // Mode Amis de 10
+                currentTargetType = 'friend10';
+                currentTarget = Math.floor(Math.random() * 10) + 1;
+                targetInstEl.textContent = "Complément à 10 de";
             }
-            currentTarget = possible[Math.floor(Math.random() * possible.length)];
+            
             targetValEl.textContent = currentTarget;
         }
 
         function spawnMeteor() {
             const config = DIFFICULTY_SETTINGS[diffSelect.value];
+            const mode = modeSelect.value;
             const size = 60 + Math.random() * 40;
             let value;
             const rand = Math.random();
-            if (rand < 0.15) {
-                value = currentTarget * 2;
-            } else if (rand < 0.30) {
-                value = Math.ceil(currentTarget / 2);
+
+            if (rand < 0.3) {
+                // Créer une bonne réponse
+                if (mode === 'doubles') {
+                    value = (currentTargetType === 'double') ? currentTarget * 2 : currentTarget / 2;
+                } else {
+                    value = 10 - currentTarget;
+                }
             } else {
-                value = Math.floor(Math.random() * (config.max * 2)) + 1;
-                if (value === currentTarget * 2 || value === currentTarget / 2) value++;
+                // Créer une mauvaise réponse
+                const maxRange = (mode === 'doubles') ? config.max * 2 : 12;
+                value = Math.floor(Math.random() * maxRange) + 1;
+                // S'assurer que ce n'est pas la bonne réponse par accident
+                const correct = (mode === 'doubles') ? (currentTargetType === 'double' ? currentTarget * 2 : currentTarget / 2) : (10 - currentTarget);
+                if (value === correct) value++;
             }
 
             meteors.push({
@@ -380,8 +425,6 @@
 
             if (player.movingLeft && player.x > 0) player.x -= player.speed;
             if (player.movingRight && player.x < canvas.width - player.w) player.x += player.speed;
-            if (player.movingUp && player.y > 100) player.y -= player.speed;
-            if (player.movingDown && player.y < canvas.height - player.h) player.y += player.speed;
 
             meteorTimer += deltaTime;
             if (meteorTimer > meteorInterval) {
@@ -414,9 +457,16 @@
                 for (let j = meteors.length - 1; j >= 0; j--) {
                     const m = meteors[j];
                     if (l.x < m.x + m.w && l.x + l.w > m.x && l.y < m.y + m.h && l.y + l.h > m.y) {
-                        const isDouble = (m.value === currentTarget * 2);
-                        const isHalf = (currentTarget % 2 === 0 && m.value === currentTarget / 2);
-                        if (isDouble || isHalf) {
+                        const mode = modeSelect.value;
+                        let isCorrect = false;
+                        
+                        if (mode === 'doubles') {
+                            isCorrect = (currentTargetType === 'double') ? (m.value === currentTarget * 2) : (m.value === currentTarget / 2);
+                        } else {
+                            isCorrect = (m.value === 10 - currentTarget);
+                        }
+
+                        if (isCorrect) {
                             score += 10;
                             scoreEl.textContent = score;
                             createExplosion(m.x + m.w/2, m.y + m.h/2, '#4ade80');
@@ -553,3 +603,4 @@
     </script>
 </body>
 </html>
+
