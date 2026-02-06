@@ -11,7 +11,7 @@
             overflow: hidden;
             background-color: #0b0e14;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            touch-action: none; /* Empêche le zoom et le scroll tactile */
+            touch-action: none; 
             user-select: none;
             -webkit-user-select: none;
         }
@@ -39,549 +39,349 @@
             padding: 10px 20px;
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
-            pointer-events: auto;
-            width: 90%;
-            max-width: 500px;
-            min-width: 320px;
-        }
-        #target-question {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #ffde59;
-            text-shadow: 0 0 15px rgba(255, 222, 89, 0.6);
-            line-height: 1.2;
-            margin-top: 5px;
-            white-space: nowrap;
-        }
-        .btn {
-            pointer-events: auto;
-            cursor: pointer;
-            transition: transform 0.1s;
-        }
-        .btn:active {
-            transform: scale(0.95);
-        }
-        #timer-bar-container {
-            width: 100%;
-            height: 8px;
-            background: rgba(255,255,255,0.1);
-            margin-top: 10px;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        #timer-bar {
-            height: 100%;
-            width: 100%;
-            background: #4ade80;
-            transition: width 1s linear;
-        }
-        select {
-            pointer-events: auto;
-            background-color: #1f2937;
-            color: white;
-            border: 1px solid #eab308;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            width: 100%;
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            outline: none;
-        }
-        .home-btn {
-            pointer-events: auto;
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background-color: rgba(31, 41, 55, 0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 50%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.2);
-            z-index: 50;
-            transition: background-color 0.2s;
-        }
-        .home-btn:hover {
-            background-color: rgba(55, 65, 81, 1);
-        }
-        
-        /* ZONES TACTILES */
-        #touch-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 20;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
-        }
-        #touch-left, #touch-right {
-            width: 50%;
-            height: 100%;
-            /* background: rgba(255, 0, 0, 0.1); Debug: décommenter pour voir les zones */ 
+            gap: 30px;
             pointer-events: auto;
         }
-        
-        /* BOUTON DE TIR */
-        #fire-btn-container {
+        .target-box {
             position: absolute;
-            bottom: 30px;
-            right: 30px;
-            z-index: 30; /* Au-dessus des zones tactiles */
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(220, 38, 38, 0.85);
+            padding: 10px 30px;
+            border-radius: 15px;
+            border: 2px solid white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
+            pointer-events: none;
+        }
+        .hidden { display: none !important; }
+
+        /* Contrôles tactiles */
+        #touch-controls {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            z-index: 50;
             pointer-events: auto;
         }
-        #fire-btn-elem {
-            width: 80px;
-            height: 80px;
-            background: radial-gradient(circle, #ef4444 0%, #b91c1c 100%);
-            border: 4px solid #fecaca;
+        .fire-button {
+            width: 90px;
+            height: 90px;
+            background: rgba(220, 38, 38, 0.7);
+            border: 4px solid white;
             border-radius: 50%;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 1.2rem;
-            touch-action: manipulation;
-            user-select: none;
+            font-size: 1.3rem;
+            box-shadow: 0 0 25px rgba(220, 38, 38, 0.5);
+            touch-action: none;
         }
-        #fire-btn-elem:active {
+        .fire-button:active {
             transform: scale(0.9);
-            background: radial-gradient(circle, #dc2626 0%, #991b1b 100%);
+            background: rgba(220, 38, 38, 0.9);
         }
     </style>
 </head>
 <body>
 
-    <!-- COUCHE TACTILE INVISIBLE -->
-    <div id="touch-layer">
-        <div id="touch-left"></div>
-        <div id="touch-right"></div>
-    </div>
-
-    <!-- BOUTON TIR -->
-    <div id="fire-btn-container">
-        <div id="fire-btn-elem">TIR</div>
-    </div>
-
     <div id="ui-layer">
-        
-        <button id="home-btn" class="home-btn" title="Retour à l'accueil">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-            </svg>
-        </button>
-
         <div class="hud-container">
-            <div class="hud-panel flex flex-col items-center shadow-lg border border-gray-700">
-                <div class="text-xs uppercase tracking-widest text-gray-400">Mission en cours :</div>
-                <div id="target-question">PRÊT ?</div>
-                <div class="flex justify-between w-full mt-2 px-4">
-                    <div class="text-sm">Score: <span id="score-val" class="font-bold text-green-400">0</span></div>
-                    <div class="text-sm">Vies: <span id="lives-val" class="font-bold text-red-400">3</span></div>
+            <div class="hud-panel shadow-lg">
+                <div class="flex flex-col items-center">
+                    <span class="text-xs uppercase opacity-70">Score</span>
+                    <span id="score" class="text-xl font-bold">0</span>
                 </div>
-                <div id="timer-bar-container">
-                    <div id="timer-bar"></div>
+                <div class="flex flex-col items-center">
+                    <span class="text-xs uppercase opacity-70">Vies</span>
+                    <span id="lives" class="text-xl font-bold text-red-400">3</span>
                 </div>
+                <div class="flex flex-col items-center">
+                    <span class="text-xs uppercase opacity-70">Temps</span>
+                    <span id="timer" class="text-xl font-bold text-yellow-400">03:00</span>
+                </div>
+                <button id="home-btn" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm self-center transition">MENU</button>
             </div>
         </div>
 
-        <div id="overlay" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 pointer-events-auto hidden z-40">
-            <div class="text-center p-6 md:p-8 bg-gray-900 border-2 border-yellow-500 rounded-2xl max-w-md w-11/12 mx-auto shadow-2xl overflow-y-auto max-h-screen" style="z-index: 50; position: relative;">
-                <h1 class="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400 mb-2 filter drop-shadow-md">Espace Doubles & Moitiés</h1>
-                <h2 id="overlay-title" class="text-xl md:text-2xl font-bold text-yellow-500 mb-6">PRÊT À DÉCOLLER ?</h2>
+        <div id="target-display" class="target-box hidden">
+            CIBLE : <span id="target-value">--</span>
+        </div>
+
+        <div id="overlay" class="absolute inset-0 bg-black/80 flex items-center justify-center pointer-events-auto">
+            <div class="bg-gray-900 p-8 rounded-3xl border-2 border-red-500 max-w-md w-full mx-4 shadow-2xl text-center">
+                <h1 id="overlay-title" class="text-4xl font-black text-red-500 mb-4 tracking-widest">ESPACE DOUBLES</h1>
+                <p id="overlay-msg" class="text-gray-300 mb-8 leading-relaxed">
+                    Détruis les astéroïdes qui correspondent au <b>Double</b> ou à la <b>Moitié</b> du nombre affiché !
+                </p>
                 
-                <div class="mb-6 text-left">
-                    <label class="text-gray-400 text-sm uppercase tracking-wide mb-2 block font-semibold">Choisis ta mission :</label>
-                    <select id="difficulty-select" class="shadow-inner cursor-pointer">
-                        <option value="N1" selected>Niveau 1 : Doubles (1-10) & Moitiés (1-20)</option>
-                        <option value="N2">Niveau 2 : Doubles (1-20) & Moitiés (1-40)</option>
-                        <option value="N3">Niveau 3 : Doubles (1-50) & Moitiés (1-100)</option>
-                        <option value="AMIS">Bonus : Les Amis de 10</option>
+                <div class="mb-8">
+                    <label class="block text-sm text-gray-500 mb-2 uppercase tracking-tighter">Niveau de difficulté</label>
+                    <select id="diff-select" class="bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2 w-full focus:outline-none focus:border-red-500">
+                        <option value="easy">Recrue (1-10)</option>
+                        <option value="medium" selected>Pilote (1-20)</option>
+                        <option value="hard">Commandant (1-50)</option>
                     </select>
                 </div>
 
-                <div id="overlay-msg" class="text-gray-300 mb-8 bg-gray-800 p-4 rounded-lg text-sm leading-relaxed text-left">
-                    <p class="mb-2">Pilote ton vaisseau et détruis les astéroïdes contenant la <b>bonne réponse</b>.</p>
-                    <ul class="list-disc list-inside text-gray-400 mb-4 text-xs">
-                        <li>Touche la <b>GAUCHE</b> de l'écran pour aller à gauche.</li>
-                        <li>Touche la <b>DROITE</b> de l'écran pour aller à droite.</li>
-                        <li>Appuie sur le bouton <b>TIR</b> (rouge) pour tirer.</li>
-                    </ul>
-                    <span class="text-yellow-400 block text-center mt-2 font-bold">Objectif : Score max en 3 minutes !</span>
-                </div>
-                <button id="start-btn" class="btn bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-8 py-4 rounded-full font-bold text-lg md:text-xl uppercase shadow-lg w-full transform transition hover:-translate-y-1">Lancer la mission</button>
+                <button id="start-btn" class="bg-red-600 hover:bg-red-500 text-white font-bold py-4 px-10 rounded-full text-xl transition-all transform hover:scale-105 shadow-lg shadow-red-900/40">
+                    LANCER LA MISSION
+                </button>
             </div>
         </div>
+    </div>
+
+    <!-- Interface tactile pour le tir -->
+    <div id="touch-controls" class="hidden">
+        <button id="fire-btn" class="fire-button">FEU !</button>
     </div>
 
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let droneNodes = [];
-
-        // --- GESTION DU FOND ÉTOILÉ ---
-        const stars = [];
-        const numStars = 100;
-
-        function initStars() {
-            stars.length = 0;
-            for(let i=0; i<numStars; i++) {
-                stars.push({
-                    x: Math.random() * window.innerWidth,
-                    y: Math.random() * window.innerHeight,
-                    size: Math.random() * 2 + 0.5,
-                    speed: Math.random() * 5 + 1 
-                });
-            }
-        }
-
-        function updateStars() {
-            stars.forEach(star => {
-                star.y += star.speed;
-                if(star.y > window.innerHeight) {
-                    star.y = 0;
-                    star.x = Math.random() * window.innerWidth;
-                }
-            });
-        }
-
-        function drawStars(ctx) {
-            ctx.fillStyle = "white";
-            stars.forEach(star => {
-                ctx.globalAlpha = Math.random() * 0.5 + 0.3;
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            ctx.globalAlpha = 1;
-        }
-        // ----------------------------------------
-
-        function startSpaceAmbience() {
-            stopSpaceAmbience();
-            const freqs = [55, 110, 165];
-            freqs.forEach((f, i) => {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                const panner = audioCtx.createStereoPanner();
-                osc.type = i === 0 ? 'triangle' : 'sine';
-                osc.frequency.value = f + (Math.random() * 2 - 1); 
-                gain.gain.value = 0.05 - (i * 0.01); 
-                panner.pan.value = (i - 1) * 0.5;
-                osc.connect(gain);
-                gain.connect(panner);
-                panner.connect(audioCtx.destination);
-                osc.start();
-                droneNodes.push({ osc, gain });
-            });
-        }
-
-        function stopSpaceAmbience() {
-            droneNodes.forEach(n => {
-                try { n.osc.stop(); n.osc.disconnect(); } catch(e) {}
-            });
-            droneNodes = [];
-        }
-        
-        function playLaserSound() {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.15);
-            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.15);
-        }
-
-        function playExplosionSound(isCorrect) {
-            const noise = audioCtx.createBufferSource();
-            const bufferSize = audioCtx.sampleRate * 0.3;
-            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) { data[i] = Math.random() * 2 - 1; }
-            noise.buffer = buffer;
-            const gain = audioCtx.createGain();
-            const startVol = isCorrect ? 0.2 : 0.15;
-            gain.gain.setValueAtTime(startVol, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = 'lowpass';
-            filter.frequency.value = isCorrect ? 1200 : 400;
-            noise.connect(filter);
-            filter.connect(gain);
-            gain.connect(audioCtx.destination);
-            noise.start();
-        }
-
-        const ASSETS = {
-            ship: 'playerShip1_red.png',
-            laser: 'laserRed13.png',
-            meteors: [
-                'meteorBrown_big1.png',
-                'meteorBrown_big2.png',
-                'meteorBrown_big3.png',
-                'meteorBrown_big4.png'
-            ]
-        };
-
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const targetQuestionEl = document.getElementById('target-question');
-        const scoreEl = document.getElementById('score-val');
-        const livesEl = document.getElementById('lives-val');
-        const timerBar = document.getElementById('timer-bar');
+        const scoreEl = document.getElementById('score');
+        const livesEl = document.getElementById('lives');
+        const timerEl = document.getElementById('timer');
         const overlay = document.getElementById('overlay');
         const overlayTitle = document.getElementById('overlay-title');
         const overlayMsg = document.getElementById('overlay-msg');
         const startBtn = document.getElementById('start-btn');
         const homeBtn = document.getElementById('home-btn');
-        const difficultySelect = document.getElementById('difficulty-select');
+        const diffSelect = document.getElementById('diff-select');
+        const targetDisplay = document.getElementById('target-display');
+        const targetValEl = document.getElementById('target-value');
+        const touchControls = document.getElementById('touch-controls');
+        const fireBtn = document.getElementById('fire-btn');
 
-        // Éléments tactiles
-        const touchLeft = document.getElementById('touch-left');
-        const touchRight = document.getElementById('touch-right');
-        const fireBtnElem = document.getElementById('fire-btn-elem');
-
-        const DIFFICULTY_SETTINGS = {
-            'N1': { speedMod: 0.8, interval: 2200 },
-            'N2': { speedMod: 1.0, interval: 1800 },
-            'N3': { speedMod: 1.2, interval: 1600 },
-            'AMIS': { speedMod: 1.0, interval: 1800 }
+        // Assets
+        const images = {
+            ship: new Image(),
+            laser: new Image(),
+            meteors: [new Image(), new Image(), new Image(), new Image()]
         };
+        images.ship.src = 'playerShip1_red.png';
+        images.laser.src = 'laserRed13.png';
+        images.meteors[0].src = 'meteorBrown_big1.png';
+        images.meteors[1].src = 'meteorBrown_big2.png';
+        images.meteors[2].src = 'meteorBrown_big3.png';
+        images.meteors[3].src = 'meteorBrown_big4.png';
 
-        let currentDifficulty = 'N1';
-        let gameState = 'START'; 
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let ambientSource = null;
+
+        function playSound(freq, type, duration) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function startSpaceAmbience() {
+            if (ambientSource) return;
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+            ambientSource = audioCtx.createBufferSource();
+            ambientSource.buffer = noiseBuffer;
+            ambientSource.loop = true;
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 100;
+            const gain = audioCtx.createGain();
+            gain.gain.value = 0.05;
+            ambientSource.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            ambientSource.start();
+        }
+
+        function stopSpaceAmbience() {
+            if (ambientSource) {
+                ambientSource.stop();
+                ambientSource = null;
+            }
+        }
+
+        let gameState = 'START';
         let score = 0;
         let lives = 3;
-        let targetValue = 0; 
         let timeLeft = 180;
         let lastTime = 0;
         let meteorTimer = 0;
-        let meteorInterval = 1800; 
+        let meteorInterval = 2000;
+        let currentTarget = 0;
         
-        // État des contrôles tactiles
-        let isTouchingLeft = false;
-        let isTouchingRight = false;
+        const DIFFICULTY_SETTINGS = {
+            easy: { max: 10, interval: 2500, speed: 1.5 },
+            medium: { max: 20, interval: 2000, speed: 2 },
+            hard: { max: 50, interval: 1500, speed: 2.5 }
+        };
 
         const player = {
-            x: 0, y: 0, w: 60, h: 50, speed: 8, 
-            img: new Image()
+            x: 0,
+            y: 0,
+            w: 60,
+            h: 50,
+            speed: 8,
+            movingLeft: false,
+            movingRight: false,
+            movingUp: false,
+            movingDown: false
         };
-        player.img.src = ASSETS.ship;
-
-        const lasers = [];
-        const laserImg = new Image();
-        laserImg.src = ASSETS.laser;
 
         const meteors = [];
-        const meteorImages = ASSETS.meteors.map(src => {
-            const img = new Image();
-            img.src = src;
-            return img;
-        });
-
+        const lasers = [];
         const particles = [];
         const floatingTexts = [];
 
-        const keys = {};
-        window.addEventListener('keydown', e => {
-            keys[e.code] = true;
-            if (e.code === 'Space' && gameState === 'PLAYING') {
-                fireLaser();
-            }
-        });
-        window.addEventListener('keyup', e => keys[e.code] = false);
-
-        // --- GESTION TACTILE ---
-        
-        // Zone Gauche
-        touchLeft.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            isTouchingLeft = true;
-        });
-        touchLeft.addEventListener('pointerup', (e) => {
-            e.preventDefault();
-            isTouchingLeft = false;
-        });
-        touchLeft.addEventListener('pointerleave', (e) => {
-            e.preventDefault();
-            isTouchingLeft = false;
-        });
-
-        // Zone Droite
-        touchRight.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            isTouchingRight = true;
-        });
-        touchRight.addEventListener('pointerup', (e) => {
-            e.preventDefault();
-            isTouchingRight = false;
-        });
-        touchRight.addEventListener('pointerleave', (e) => {
-            e.preventDefault();
-            isTouchingRight = false;
-        });
-
-        // Bouton de Tir
-        fireBtnElem.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            e.stopPropagation(); // Empêche l'événement de remonter (évite le mouvement à droite)
-            if (gameState === 'PLAYING') {
-                fireLaser();
-                // Petit effet visuel JS (optionnel car CSS le fait aussi)
-                fireBtnElem.style.transform = "scale(0.9)";
-                setTimeout(() => fireBtnElem.style.transform = "scale(1)", 100);
-            }
-        });
-
         function init() {
             resize();
-            initStars(); 
-            player.x = canvas.width / 2;
-            player.y = canvas.height - 100;
-            overlay.classList.remove('hidden');
+            window.addEventListener('resize', resize);
+            document.addEventListener('keydown', (e) => handleKey(e, true));
+            document.addEventListener('keyup', (e) => handleKey(e, false));
+            
+            // Écouteurs Tactiles
+            canvas.addEventListener('touchstart', handleTouch, { passive: false });
+            canvas.addEventListener('touchmove', handleTouch, { passive: false });
+            fireBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (gameState === 'PLAYING') fire();
+            });
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            if (gameState !== 'PLAYING') return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            // Positionnement du vaisseau : le centre du vaisseau suit le doigt, 
+            // avec un léger décalage vertical pour ne pas cacher le vaisseau sous le doigt
+            player.x = touch.clientX - rect.left - player.w / 2;
+            player.y = touch.clientY - rect.top - player.h - 40; 
+
+            // Limites de l'écran
+            if (player.x < 0) player.x = 0;
+            if (player.x > canvas.width - player.w) player.x = canvas.width - player.w;
+            if (player.y < 50) player.y = 50;
+            if (player.y > canvas.height - player.h) player.y = canvas.height - player.h;
         }
 
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            if(player.x > canvas.width) player.x = canvas.width - player.w;
-            if(player.y > canvas.height) player.y = canvas.height - player.h;
-            if (gameState === 'START') initStars();
+            if (gameState === 'START') {
+                player.x = canvas.width / 2 - player.w / 2;
+                player.y = canvas.height - 100;
+            }
         }
-        window.addEventListener('resize', resize);
 
-        // --- LOGIQUE DE JEU ---
+        function handleKey(e, isPressed) {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') player.movingLeft = isPressed;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') player.movingRight = isPressed;
+            if (e.code === 'ArrowUp' || e.code === 'KeyW') player.movingUp = isPressed;
+            if (e.code === 'ArrowDown' || e.code === 'KeyS') player.movingDown = isPressed;
+            if (isPressed && e.code === 'Space' && gameState === 'PLAYING') fire();
+        }
+
+        function fire() {
+            lasers.push({
+                x: player.x + player.w / 2 - 4,
+                y: player.y,
+                w: 9,
+                h: 33,
+                speed: 10
+            });
+            playSound(400, 'square', 0.1);
+        }
 
         function generateNewTarget() {
-            let type = ''; 
-            let number = 0;
-            let questionText = "";
-
-            if (currentDifficulty === 'AMIS') {
-                type = 'AMIS';
-                number = Math.floor(Math.random() * 11); 
-                targetValue = 10 - number;
-                questionText = `${number} + ? = 10`;
-            } else {
-                type = Math.random() > 0.5 ? 'DOUBLE' : 'HALF';
-
-                if (type === 'DOUBLE') {
-                    let max = 10;
-                    if (currentDifficulty === 'N2') max = 20;
-                    if (currentDifficulty === 'N3') max = 50;
-                    number = Math.floor(Math.random() * max) + 1;
-                    targetValue = number * 2;
-                    questionText = `Double de ${number}`;
-                } else {
-                    let maxPair = 20;
-                    if (currentDifficulty === 'N2') maxPair = 40;
-                    if (currentDifficulty === 'N3') maxPair = 100;
-                    number = (Math.floor(Math.random() * (maxPair/2)) + 1) * 2;
-                    targetValue = number / 2;
-                    questionText = `Moitié de ${number}`;
-                }
+            const config = DIFFICULTY_SETTINGS[diffSelect.value];
+            const possible = [];
+            for (let i = 2; i <= config.max; i++) {
+                possible.push(i);
             }
-
-            targetQuestionEl.textContent = questionText;
+            currentTarget = possible[Math.floor(Math.random() * possible.length)];
+            targetValEl.textContent = currentTarget;
         }
 
         function spawnMeteor() {
-            const size = 80 + Math.random() * 40;
-            let displayValue, isCorrect;
-            
-            if (Math.random() > 0.7) {
-                displayValue = targetValue;
-                isCorrect = true;
+            const config = DIFFICULTY_SETTINGS[diffSelect.value];
+            const size = 60 + Math.random() * 40;
+            let value;
+            const rand = Math.random();
+            if (rand < 0.15) {
+                value = currentTarget * 2;
+            } else if (rand < 0.30) {
+                value = Math.ceil(currentTarget / 2);
             } else {
-                isCorrect = false;
-                const offset = Math.floor(Math.random() * 5) + 1;
-                const sign = Math.random() > 0.5 ? 1 : -1;
-                
-                if (Math.random() > 0.8 && targetValue % 2 === 0) {
-                     displayValue = targetValue / 2; 
-                } else if (Math.random() > 0.8) {
-                     displayValue = targetValue * 2; 
-                } else {
-                     displayValue = Math.max(0, targetValue + (offset * sign));
-                }
-                
-                if (displayValue === targetValue) displayValue = targetValue + 1;
+                value = Math.floor(Math.random() * (config.max * 2)) + 1;
+                if (value === currentTarget * 2 || value === currentTarget / 2) value++;
             }
-
-            const settings = DIFFICULTY_SETTINGS[currentDifficulty];
-            const baseSpeed = 1.5 + Math.random() * 2;
 
             meteors.push({
                 x: Math.random() * (canvas.width - size),
                 y: -size,
                 w: size,
                 h: size,
-                speed: baseSpeed * settings.speedMod,
-                rotation: 0,
-                rotSpeed: (Math.random() - 0.5) * 0.15, 
-                img: meteorImages[Math.floor(Math.random() * meteorImages.length)],
-                label: `${displayValue}`, 
-                value: displayValue,
-                isCorrect: isCorrect
+                speed: config.speed + (Math.random() * 1),
+                value: value,
+                img: images.meteors[Math.floor(Math.random() * 4)],
+                rot: 0,
+                rotSpeed: (Math.random() - 0.5) * 0.05
             });
         }
 
-        function fireLaser() {
-            lasers.push({ x: player.x, y: player.y - 20, w: 9, h: 33, speed: 12 });
-            playLaserSound();
-        }
-
-        function addFloatingText(x, y, text, color) {
-            floatingTexts.push({ x, y, text, color, life: 1.0 });
-        }
-
         function createExplosion(x, y, color) {
-            for (let i = 0; i < 30; i++) { 
+            for (let i = 0; i < 15; i++) {
                 particles.push({
                     x, y,
-                    vx: (Math.random() - 0.5) * 15, 
-                    vy: (Math.random() - 0.5) * 15,
-                    life: 1,
-                    decay: 0.02 + Math.random() * 0.03,
-                    color: color,
-                    size: Math.random() * 5 + 2 
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    life: 1.0,
+                    color: color
                 });
             }
+        }
+
+        function showFloatingText(text, x, y, color) {
+            floatingTexts.push({
+                text, x, y, color,
+                life: 1.0,
+                vy: -2
+            });
         }
 
         function update(deltaTime) {
             if (gameState !== 'PLAYING') return;
 
-            updateStars(); 
-
             timeLeft -= deltaTime / 1000;
-            if (timeLeft <= 0) { timeLeft = 0; endGame("TEMPS ÉCOULÉ !"); }
+            if (timeLeft <= 0) endGame("TEMPS ÉCOULÉ !");
             
-            timerBar.style.width = `${(timeLeft / 180) * 100}%`;
+            const mins = Math.floor(timeLeft / 60);
+            const secs = Math.floor(timeLeft % 60);
+            timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 
-            // Mouvement : Clavier OU Tactile
-            if ((keys['ArrowLeft'] || isTouchingLeft) && player.x > player.w/2) {
-                player.x -= player.speed;
-            }
-            if ((keys['ArrowRight'] || isTouchingRight) && player.x < canvas.width - player.w/2) {
-                player.x += player.speed;
-            }
-            // Mouvement vertical optionnel au clavier uniquement pour l'instant (non demandé en tactile)
-            if (keys['ArrowUp'] && player.y > player.h/2) player.y -= player.speed;
-            if (keys['ArrowDown'] && player.y < canvas.height - player.h/2) player.y += player.speed;
-            
-            for (let i = lasers.length - 1; i >= 0; i--) {
-                lasers[i].y -= lasers[i].speed;
-                if (lasers[i].y < -50) lasers.splice(i, 1);
-            }
+            if (player.movingLeft && player.x > 0) player.x -= player.speed;
+            if (player.movingRight && player.x < canvas.width - player.w) player.x += player.speed;
+            if (player.movingUp && player.y > 100) player.y -= player.speed;
+            if (player.movingDown && player.y < canvas.height - player.h) player.y += player.speed;
 
             meteorTimer += deltaTime;
             if (meteorTimer > meteorInterval) {
@@ -592,104 +392,117 @@
             for (let i = meteors.length - 1; i >= 0; i--) {
                 const m = meteors[i];
                 m.y += m.speed;
-                m.rotation += m.rotSpeed; 
+                m.rot += m.rotSpeed;
 
-                if (m.y > canvas.height + m.h) {
-                    meteors.splice(i, 1);
-                    continue;
-                }
-
-                const dist = Math.hypot(m.x + m.w/2 - player.x, m.y + m.h/2 - player.y);
-                if (dist < (m.w + player.w) / 2.5) {
-                    createExplosion(player.x, player.y, '#ff4444');
-                    playExplosionSound(false);
+                if (m.x < player.x + player.w && m.x + m.w > player.x &&
+                    m.y < player.y + player.h && m.y + m.h > player.y) {
                     lives--;
                     livesEl.textContent = lives;
-                    addFloatingText(player.x, player.y - 20, "AÏE !", "#ff4444");
+                    createExplosion(player.x + player.w/2, player.y + player.h/2, '#ff0000');
+                    playSound(150, 'sawtooth', 0.3);
                     meteors.splice(i, 1);
-                    if (lives <= 0) endGame("MISSION ÉCHOUÉE");
+                    if (lives <= 0) endGame("VAISSEAU DÉTRUIT !");
                     continue;
                 }
+                if (m.y > canvas.height) meteors.splice(i, 1);
+            }
 
-                for (let j = lasers.length - 1; j >= 0; j--) {
-                    const l = lasers[j];
-                    if (l.x > m.x && l.x < m.x + m.w && l.y > m.y && l.y < m.y + m.h) {
-                        const correct = (m.value === targetValue);
-                        createExplosion(m.x + m.w/2, m.y + m.h/2, correct ? '#4ade80' : '#8b5a2b');
-                        playExplosionSound(correct);
-                        
-                        if (correct) {
+            for (let i = lasers.length - 1; i >= 0; i--) {
+                const l = lasers[i];
+                l.y -= l.speed;
+                let hit = false;
+                for (let j = meteors.length - 1; j >= 0; j--) {
+                    const m = meteors[j];
+                    if (l.x < m.x + m.w && l.x + l.w > m.x && l.y < m.y + m.h && l.y + l.h > m.y) {
+                        const isDouble = (m.value === currentTarget * 2);
+                        const isHalf = (currentTarget % 2 === 0 && m.value === currentTarget / 2);
+                        if (isDouble || isHalf) {
                             score += 10;
-                            addFloatingText(m.x + m.w/2, m.y, "BRAVO !", "#4ade80");
+                            scoreEl.textContent = score;
+                            createExplosion(m.x + m.w/2, m.y + m.h/2, '#4ade80');
+                            showFloatingText("+10", m.x + m.w/2, m.y, '#4ade80');
+                            playSound(600, 'sine', 0.2);
                             generateNewTarget();
                         } else {
                             score = Math.max(0, score - 5);
-                            addFloatingText(m.x + m.w/2, m.y, "ERREUR !", "#ff4444");
+                            scoreEl.textContent = score;
+                            createExplosion(m.x + m.w/2, m.y + m.h/2, '#ef4444');
+                            showFloatingText("-5", m.x + m.w/2, m.y, '#ef4444');
+                            playSound(100, 'square', 0.2);
                         }
-                        
-                        scoreEl.textContent = score;
-                        meteors.splice(i, 1);
-                        lasers.splice(j, 1);
+                        meteors.splice(j, 1);
+                        lasers.splice(i, 1);
+                        hit = true;
                         break;
                     }
                 }
+                if (!hit && l.y < -l.h) lasers.splice(i, 1);
             }
 
-            particles.forEach((p, i) => {
-                p.x += p.vx; p.y += p.vy; 
-                p.life -= p.decay; 
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx; p.y += p.vy; p.life -= 0.02;
                 if (p.life <= 0) particles.splice(i, 1);
-            });
-            floatingTexts.forEach((t, i) => {
-                t.y -= 1; t.life -= 0.02;
+            }
+
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const t = floatingTexts[i];
+                t.y += t.vy; t.life -= 0.015;
                 if (t.life <= 0) floatingTexts.splice(i, 1);
-            });
+            }
         }
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            drawStars(ctx);
+            ctx.fillStyle = 'white';
+            for(let i=0; i<50; i++) {
+                const x = (Math.sin(i * 123) * 0.5 + 0.5) * canvas.width;
+                const y = ((Date.now() * 0.05 + i * 456) % canvas.height);
+                ctx.globalAlpha = 0.3;
+                ctx.fillRect(x, y, 2, 2);
+            }
+            ctx.globalAlpha = 1.0;
 
-            lasers.forEach(l => ctx.drawImage(laserImg, l.x - l.w/2, l.y - l.h/2, l.w, l.h));
-            ctx.save();
-            ctx.translate(player.x, player.y);
-            ctx.drawImage(player.img, -player.w/2, -player.h/2, player.w, player.h);
-            ctx.restore();
             meteors.forEach(m => {
                 ctx.save();
                 ctx.translate(m.x + m.w/2, m.y + m.h/2);
-                ctx.rotate(m.rotation);
+                ctx.rotate(m.rot);
                 ctx.drawImage(m.img, -m.w/2, -m.h/2, m.w, m.h);
                 ctx.restore();
-                ctx.fillStyle = "white";
-                ctx.font = "bold 30px Arial"; 
-                ctx.textAlign = "center";
-                ctx.strokeStyle = "black";
-                ctx.lineWidth = 4;
-                ctx.strokeText(m.label, m.x + m.w/2, m.y + m.h/2 + 10);
-                ctx.fillText(m.label, m.x + m.w/2, m.y + m.h/2 + 10);
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 20px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 3;
+                ctx.strokeText(m.value, m.x + m.w/2, m.y + m.h/2 + 7);
+                ctx.fillText(m.value, m.x + m.w/2, m.y + m.h/2 + 7);
             });
+
+            lasers.forEach(l => ctx.drawImage(images.laser, l.x, l.y, l.w, l.h));
+
             particles.forEach(p => {
                 ctx.globalAlpha = p.life;
                 ctx.fillStyle = p.color;
-                ctx.beginPath(); 
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); 
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
                 ctx.fill();
             });
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = 1.0;
+
+            ctx.drawImage(images.ship, player.x, player.y, player.w, player.h);
+
             floatingTexts.forEach(t => {
                 ctx.globalAlpha = t.life;
                 ctx.fillStyle = t.color;
-                ctx.font = "bold 24px Arial";
-                ctx.textAlign = "center";
+                ctx.font = 'bold 24px sans-serif';
+                ctx.textAlign = 'center';
                 ctx.fillText(t.text, t.x, t.y);
             });
-            ctx.globalAlpha = 1;
+            ctx.globalAlpha = 1.0;
         }
 
         function gameLoop(timestamp) {
-            const deltaTime = timestamp - (lastTime || timestamp);
+            const deltaTime = timestamp - lastTime;
             lastTime = timestamp;
             update(deltaTime);
             draw();
@@ -697,10 +510,11 @@
         }
 
         function startGame() {
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-            startSpaceAmbience(); 
-            currentDifficulty = difficultySelect.value;
-            const settings = DIFFICULTY_SETTINGS[currentDifficulty];
+            audioCtx.resume();
+            startSpaceAmbience();
+            targetDisplay.classList.remove('hidden');
+            touchControls.classList.remove('hidden');
+            const settings = DIFFICULTY_SETTINGS[diffSelect.value];
             meteorInterval = settings.interval;
             score = 0; lives = 3; timeLeft = 180;
             scoreEl.textContent = score;
@@ -715,6 +529,7 @@
         function endGame(reason) {
             gameState = 'GAMEOVER';
             stopSpaceAmbience();
+            touchControls.classList.add('hidden');
             overlayTitle.textContent = reason;
             overlayMsg.innerHTML = `<div class="text-center">MISSION TERMINÉE !<br><br><b>Score Final : ${score}</b><br>Continue tes efforts !</div>`;
             startBtn.textContent = "REESSAYER";
@@ -724,6 +539,8 @@
         homeBtn.addEventListener('click', () => {
             gameState = 'START';
             stopSpaceAmbience();
+            targetDisplay.classList.add('hidden');
+            touchControls.classList.add('hidden');
             overlayTitle.textContent = "PAUSE";
             overlayMsg.innerHTML = `<div class="text-center">Partie interrompue.<br><br><b>Score actuel : ${score}</b></div>`;
             startBtn.textContent = "REPRENDRE / REJOUER";
