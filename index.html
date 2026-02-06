@@ -198,6 +198,22 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let ambientSource = null;
 
+        // Gestion des étoiles (Parallaxe)
+        const stars = [];
+        function createStars() {
+            stars.length = 0;
+            // Trois couches d'étoiles
+            for (let i = 0; i < 150; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.5,
+                    speed: 0.5 + Math.random() * 2,
+                    opacity: 0.2 + Math.random() * 0.5
+                });
+            }
+        }
+
         function playSound(freq, type, duration) {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -261,7 +277,7 @@
             y: 0,
             w: 60,
             h: 50,
-            speed: 8,
+            speed: 10,
             movingLeft: false,
             movingRight: false
         };
@@ -273,7 +289,11 @@
 
         function init() {
             resize();
-            window.addEventListener('resize', resize);
+            createStars();
+            window.addEventListener('resize', () => {
+                resize();
+                createStars();
+            });
             document.addEventListener('keydown', (e) => handleKey(e, true));
             document.addEventListener('keyup', (e) => handleKey(e, false));
             
@@ -339,7 +359,6 @@
                 for (let i = 2; i <= config.max; i++) possible.push(i);
                 currentTarget = possible[Math.floor(Math.random() * possible.length)];
                 
-                // Choisir au hasard entre chercher le double ou la moitié (si pair)
                 if (currentTarget % 2 === 0 && Math.random() > 0.5) {
                     currentTargetType = 'half';
                     targetInstEl.textContent = "Trouve la moitié de";
@@ -348,9 +367,8 @@
                     targetInstEl.textContent = "Trouve le double de";
                 }
             } else {
-                // Mode Amis de 10
                 currentTargetType = 'friend10';
-                currentTarget = Math.floor(Math.random() * 10) + 1;
+                currentTarget = Math.floor(Math.random() * 10); // 0 à 10
                 targetInstEl.textContent = "Complément à 10 de";
             }
             
@@ -365,17 +383,14 @@
             const rand = Math.random();
 
             if (rand < 0.3) {
-                // Créer une bonne réponse
                 if (mode === 'doubles') {
                     value = (currentTargetType === 'double') ? currentTarget * 2 : currentTarget / 2;
                 } else {
                     value = 10 - currentTarget;
                 }
             } else {
-                // Créer une mauvaise réponse
                 const maxRange = (mode === 'doubles') ? config.max * 2 : 12;
                 value = Math.floor(Math.random() * maxRange) + 1;
-                // S'assurer que ce n'est pas la bonne réponse par accident
                 const correct = (mode === 'doubles') ? (currentTargetType === 'double' ? currentTarget * 2 : currentTarget / 2) : (10 - currentTarget);
                 if (value === correct) value++;
             }
@@ -394,12 +409,13 @@
         }
 
         function createExplosion(x, y, color) {
-            for (let i = 0; i < 15; i++) {
+            for (let i = 0; i < 20; i++) {
                 particles.push({
                     x, y,
-                    vx: (Math.random() - 0.5) * 10,
-                    vy: (Math.random() - 0.5) * 10,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.5) * 12,
                     life: 1.0,
+                    size: 2 + Math.random() * 4,
                     color: color
                 });
             }
@@ -414,6 +430,15 @@
         }
 
         function update(deltaTime) {
+            // Animation des étoiles (même hors jeu)
+            stars.forEach(s => {
+                s.y += s.speed;
+                if (s.y > canvas.height) {
+                    s.y = -10;
+                    s.x = Math.random() * canvas.width;
+                }
+            });
+
             if (gameState !== 'PLAYING') return;
 
             timeLeft -= deltaTime / 1000;
@@ -437,12 +462,14 @@
                 m.y += m.speed;
                 m.rot += m.rotSpeed;
 
+                // Collision avec le joueur
                 if (m.x < player.x + player.w && m.x + m.w > player.x &&
                     m.y < player.y + player.h && m.y + m.h > player.y) {
                     lives--;
                     livesEl.textContent = lives;
-                    createExplosion(player.x + player.w/2, player.y + player.h/2, '#ff0000');
-                    playSound(150, 'sawtooth', 0.3);
+                    createExplosion(player.x + player.w/2, player.y + player.h/2, '#ff4444');
+                    showFloatingText("Aïe !", player.x + player.w/2, player.y, '#ff4444');
+                    playSound(100, 'sawtooth', 0.4);
                     meteors.splice(i, 1);
                     if (lives <= 0) endGame("VAISSEAU DÉTRUIT !");
                     continue;
@@ -504,13 +531,15 @@
 
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'white';
-            for(let i=0; i<50; i++) {
-                const x = (Math.sin(i * 123) * 0.5 + 0.5) * canvas.width;
-                const y = ((Date.now() * 0.05 + i * 456) % canvas.height);
-                ctx.globalAlpha = 0.3;
-                ctx.fillRect(x, y, 2, 2);
-            }
+            
+            // Dessin des étoiles (Parallaxe)
+            stars.forEach(s => {
+                ctx.globalAlpha = s.opacity;
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
             ctx.globalAlpha = 1.0;
 
             meteors.forEach(m => {
@@ -534,18 +563,22 @@
                 ctx.globalAlpha = p.life;
                 ctx.fillStyle = p.color;
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
                 ctx.fill();
             });
             ctx.globalAlpha = 1.0;
 
+            // Joueur
             ctx.drawImage(images.ship, player.x, player.y, player.w, player.h);
 
             floatingTexts.forEach(t => {
                 ctx.globalAlpha = t.life;
                 ctx.fillStyle = t.color;
-                ctx.font = 'bold 24px sans-serif';
+                ctx.font = 'bold 28px sans-serif';
                 ctx.textAlign = 'center';
+                ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+                ctx.lineWidth = 4;
+                ctx.strokeText(t.text, t.x, t.y);
                 ctx.fillText(t.text, t.x, t.y);
             });
             ctx.globalAlpha = 1.0;
