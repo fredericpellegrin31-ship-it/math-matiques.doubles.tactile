@@ -9,7 +9,7 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #0b0e14;
+            background-color: #050a14;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             touch-action: none; 
             user-select: none;
@@ -35,26 +35,42 @@
             pointer-events: none;
         }
         .hud-panel {
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(10, 25, 50, 0.8);
             padding: 10px 20px;
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(0, 150, 255, 0.3);
             display: flex;
             gap: 30px;
             pointer-events: auto;
+        }
+        /* Nouvelle barre de temps */
+        .timer-wrapper {
+            width: 120px;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 150, 255, 0.5);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        #timer-bar {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+            transition: width 0.1s linear;
         }
         .target-box {
             position: absolute;
             top: 80px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(220, 38, 38, 0.85);
+            background: rgba(30, 64, 175, 0.85); /* Bleu */
             padding: 10px 30px;
             border-radius: 15px;
-            border: 2px solid white;
+            border: 2px solid #60a5fa;
             text-align: center;
-            box-shadow: 0 0 15px rgba(220, 38, 38, 0.5);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
             pointer-events: none;
         }
         #target-instruction {
@@ -70,7 +86,7 @@
         }
         .hidden { display: none !important; }
 
-        /* Contrôles tactiles */
+        /* Contrôles tactiles Thème Bleu */
         #touch-controls {
             position: absolute;
             bottom: 40px;
@@ -81,8 +97,8 @@
         .fire-button {
             width: 90px;
             height: 90px;
-            background: rgba(220, 38, 38, 0.7);
-            border: 4px solid white;
+            background: rgba(30, 64, 175, 0.7);
+            border: 4px solid #60a5fa;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -90,12 +106,12 @@
             color: white;
             font-weight: bold;
             font-size: 1.3rem;
-            box-shadow: 0 0 25px rgba(220, 38, 38, 0.5);
+            box-shadow: 0 0 25px rgba(37, 99, 235, 0.5);
             touch-action: none;
         }
         .fire-button:active {
             transform: scale(0.9);
-            background: rgba(220, 38, 38, 0.9);
+            background: rgba(30, 64, 175, 0.9);
         }
     </style>
 </head>
@@ -106,17 +122,19 @@
             <div class="hud-panel shadow-lg">
                 <div class="flex flex-col items-center">
                     <span class="text-xs uppercase opacity-70">Score</span>
-                    <span id="score" class="text-xl font-bold">0</span>
+                    <span id="score" class="text-xl font-bold text-blue-300">0</span>
                 </div>
                 <div class="flex flex-col items-center">
                     <span class="text-xs uppercase opacity-70">Vies</span>
-                    <span id="lives" class="text-xl font-bold text-red-400">3</span>
+                    <span id="lives" class="text-xl font-bold text-blue-400">3</span>
                 </div>
                 <div class="flex flex-col items-center">
-                    <span class="text-xs uppercase opacity-70">Temps</span>
-                    <span id="timer" class="text-xl font-bold text-yellow-400">03:00</span>
+                    <span class="text-xs uppercase opacity-70">Temps Restant</span>
+                    <div class="timer-wrapper">
+                        <div id="timer-bar"></div>
+                    </div>
                 </div>
-                <button id="home-btn" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded text-sm self-center transition">MENU</button>
+                <button id="home-btn" class="bg-blue-900/50 hover:bg-blue-800 border border-blue-500/30 px-3 py-1 rounded text-sm self-center transition">MENU</button>
             </div>
         </div>
 
@@ -126,15 +144,15 @@
         </div>
 
         <div id="overlay" class="absolute inset-0 bg-black/80 flex items-center justify-center pointer-events-auto">
-            <div class="bg-gray-900 p-8 rounded-3xl border-2 border-red-500 max-w-md w-full mx-4 shadow-2xl text-center">
-                <h1 id="overlay-title" class="text-4xl font-black text-red-500 mb-4 tracking-widest uppercase">Espace Maths</h1>
+            <div class="bg-gray-900 p-8 rounded-3xl border-2 border-blue-500 max-w-md w-full mx-4 shadow-2xl text-center">
+                <h1 id="overlay-title" class="text-4xl font-black text-blue-500 mb-4 tracking-widest uppercase">Espace Maths</h1>
                 <p id="overlay-msg" class="text-gray-300 mb-8 leading-relaxed">
                     Détruis les astéroïdes qui correspondent à la consigne affichée !
                 </p>
                 
                 <div class="mb-6">
                     <label class="block text-sm text-gray-500 mb-2 uppercase tracking-tighter">Mode de jeu</label>
-                    <select id="game-mode" class="bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2 w-full focus:outline-none focus:border-red-500">
+                    <select id="game-mode" class="bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2 w-full focus:outline-none focus:border-blue-500">
                         <option value="doubles">Doubles & Moitiés</option>
                         <option value="friends10">Les Amis de 10</option>
                     </select>
@@ -142,21 +160,20 @@
 
                 <div class="mb-8">
                     <label class="block text-sm text-gray-500 mb-2 uppercase tracking-tighter">Difficulté</label>
-                    <select id="diff-select" class="bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2 w-full focus:outline-none focus:border-red-500">
+                    <select id="diff-select" class="bg-gray-800 text-white border border-gray-700 rounded-lg px-4 py-2 w-full focus:outline-none focus:border-blue-500">
                         <option value="easy">Recrue (1-10)</option>
                         <option value="medium" selected>Pilote (1-20)</option>
                         <option value="hard">Commandant (1-50)</option>
                     </select>
                 </div>
 
-                <button id="start-btn" class="bg-red-600 hover:bg-red-500 text-white font-bold py-4 px-10 rounded-full text-xl transition-all transform hover:scale-105 shadow-lg shadow-red-900/40">
+                <button id="start-btn" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-10 rounded-full text-xl transition-all transform hover:scale-105 shadow-lg shadow-blue-900/40">
                     LANCER LA MISSION
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Interface tactile pour le tir -->
     <div id="touch-controls" class="hidden">
         <button id="fire-btn" class="fire-button">FEU !</button>
     </div>
@@ -168,7 +185,7 @@
         const ctx = canvas.getContext('2d');
         const scoreEl = document.getElementById('score');
         const livesEl = document.getElementById('lives');
-        const timerEl = document.getElementById('timer');
+        const timerBar = document.getElementById('timer-bar');
         const overlay = document.getElementById('overlay');
         const overlayTitle = document.getElementById('overlay-title');
         const overlayMsg = document.getElementById('overlay-msg');
@@ -182,14 +199,17 @@
         const touchControls = document.getElementById('touch-controls');
         const fireBtn = document.getElementById('fire-btn');
 
-        // Assets
         const images = {
             ship: new Image(),
             laser: new Image(),
             meteors: [new Image(), new Image(), new Image(), new Image()]
         };
-        images.ship.src = 'playerShip1_red.png';
-        images.laser.src = 'laserRed13.png';
+        // Utilisation des versions bleues si disponibles, sinon les standards (Le code CSS gère le thème visuel)
+        images.ship.src = 'playerShip1_blue.png'; // Tentative de chargement vaisseau bleu
+        images.ship.onerror = () => images.ship.src = 'playerShip1_red.png';
+        images.laser.src = 'laserBlue01.png'; // Tentative de chargement laser bleu
+        images.laser.onerror = () => images.laser.src = 'laserRed13.png';
+        
         images.meteors[0].src = 'meteorBrown_big1.png';
         images.meteors[1].src = 'meteorBrown_big2.png';
         images.meteors[2].src = 'meteorBrown_big3.png';
@@ -198,11 +218,9 @@
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let ambientSource = null;
 
-        // Gestion des étoiles (Parallaxe)
         const stars = [];
         function createStars() {
             stars.length = 0;
-            // Trois couches d'étoiles
             for (let i = 0; i < 150; i++) {
                 stars.push({
                     x: Math.random() * canvas.width,
@@ -232,9 +250,7 @@
             const bufferSize = 2 * audioCtx.sampleRate;
             const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
             const output = noiseBuffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) {
-                output[i] = Math.random() * 2 - 1;
-            }
+            for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
             ambientSource = audioCtx.createBufferSource();
             ambientSource.buffer = noiseBuffer;
             ambientSource.loop = true;
@@ -259,12 +275,13 @@
         let gameState = 'START';
         let score = 0;
         let lives = 3;
-        let timeLeft = 180;
+        const TOTAL_TIME = 180;
+        let timeLeft = TOTAL_TIME;
         let lastTime = 0;
         let meteorTimer = 0;
         let meteorInterval = 2000;
         let currentTarget = 0;
-        let currentTargetType = ''; // 'double', 'half', 'friend10'
+        let currentTargetType = '';
         
         const DIFFICULTY_SETTINGS = {
             easy: { max: 10, interval: 2500, speed: 1.5 },
@@ -290,14 +307,10 @@
         function init() {
             resize();
             createStars();
-            window.addEventListener('resize', () => {
-                resize();
-                createStars();
-            });
+            window.addEventListener('resize', () => { resize(); createStars(); });
             document.addEventListener('keydown', (e) => handleKey(e, true));
             document.addEventListener('keyup', (e) => handleKey(e, false));
             
-            // Écouteurs Tactiles : Zones gauche/droite
             canvas.addEventListener('touchstart', handleTouch, { passive: false });
             canvas.addEventListener('touchmove', handleTouch, { passive: false });
             canvas.addEventListener('touchend', () => {
@@ -316,7 +329,6 @@
             if (gameState !== 'PLAYING') return;
             const touch = e.touches[0];
             const middleX = window.innerWidth / 2;
-
             if (touch.clientX < middleX) {
                 player.movingLeft = true;
                 player.movingRight = false;
@@ -345,9 +357,9 @@
                 y: player.y,
                 w: 9,
                 h: 33,
-                speed: 10
+                speed: 12
             });
-            playSound(400, 'square', 0.1);
+            playSound(500, 'sine', 0.1);
         }
 
         function generateNewTarget() {
@@ -368,10 +380,9 @@
                 }
             } else {
                 currentTargetType = 'friend10';
-                currentTarget = Math.floor(Math.random() * 10); // 0 à 10
+                currentTarget = Math.floor(Math.random() * 11);
                 targetInstEl.textContent = "Complément à 10 de";
             }
-            
             targetValEl.textContent = currentTarget;
         }
 
@@ -389,7 +400,7 @@
                     value = 10 - currentTarget;
                 }
             } else {
-                const maxRange = (mode === 'doubles') ? config.max * 2 : 12;
+                const maxRange = (mode === 'doubles') ? config.max * 2 : 15;
                 value = Math.floor(Math.random() * maxRange) + 1;
                 const correct = (mode === 'doubles') ? (currentTargetType === 'double' ? currentTarget * 2 : currentTarget / 2) : (10 - currentTarget);
                 if (value === correct) value++;
@@ -430,7 +441,6 @@
         }
 
         function update(deltaTime) {
-            // Animation des étoiles (même hors jeu)
             stars.forEach(s => {
                 s.y += s.speed;
                 if (s.y > canvas.height) {
@@ -442,11 +452,19 @@
             if (gameState !== 'PLAYING') return;
 
             timeLeft -= deltaTime / 1000;
-            if (timeLeft <= 0) endGame("TEMPS ÉCOULÉ !");
+            // Mise à jour de la barre de temps
+            const percentage = Math.max(0, (timeLeft / TOTAL_TIME) * 100);
+            timerBar.style.width = `${percentage}%`;
             
-            const mins = Math.floor(timeLeft / 60);
-            const secs = Math.floor(timeLeft % 60);
-            timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            if (percentage < 25) {
+                timerBar.style.background = '#ef4444'; // Rouge si presque fini
+            } else if (percentage < 50) {
+                timerBar.style.background = '#f59e0b'; // Orange
+            } else {
+                timerBar.style.background = 'linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%)';
+            }
+
+            if (timeLeft <= 0) endGame("TEMPS ÉCOULÉ !");
 
             if (player.movingLeft && player.x > 0) player.x -= player.speed;
             if (player.movingRight && player.x < canvas.width - player.w) player.x += player.speed;
@@ -462,13 +480,12 @@
                 m.y += m.speed;
                 m.rot += m.rotSpeed;
 
-                // Collision avec le joueur
                 if (m.x < player.x + player.w && m.x + m.w > player.x &&
                     m.y < player.y + player.h && m.y + m.h > player.y) {
                     lives--;
                     livesEl.textContent = lives;
-                    createExplosion(player.x + player.w/2, player.y + player.h/2, '#ff4444');
-                    showFloatingText("Aïe !", player.x + player.w/2, player.y, '#ff4444');
+                    createExplosion(player.x + player.w/2, player.y + player.h/2, '#60a5fa');
+                    showFloatingText("Aïe !", player.x + player.w/2, player.y, '#60a5fa');
                     playSound(100, 'sawtooth', 0.4);
                     meteors.splice(i, 1);
                     if (lives <= 0) endGame("VAISSEAU DÉTRUIT !");
@@ -485,13 +502,9 @@
                     const m = meteors[j];
                     if (l.x < m.x + m.w && l.x + l.w > m.x && l.y < m.y + m.h && l.y + l.h > m.y) {
                         const mode = modeSelect.value;
-                        let isCorrect = false;
-                        
-                        if (mode === 'doubles') {
-                            isCorrect = (currentTargetType === 'double') ? (m.value === currentTarget * 2) : (m.value === currentTarget / 2);
-                        } else {
-                            isCorrect = (m.value === 10 - currentTarget);
-                        }
+                        let isCorrect = (mode === 'doubles') 
+                            ? (currentTargetType === 'double' ? (m.value === currentTarget * 2) : (m.value === currentTarget / 2))
+                            : (m.value === 10 - currentTarget);
 
                         if (isCorrect) {
                             score += 10;
@@ -505,7 +518,7 @@
                             scoreEl.textContent = score;
                             createExplosion(m.x + m.w/2, m.y + m.h/2, '#ef4444');
                             showFloatingText("-5", m.x + m.w/2, m.y, '#ef4444');
-                            playSound(100, 'square', 0.2);
+                            playSound(150, 'square', 0.2);
                         }
                         meteors.splice(j, 1);
                         lasers.splice(i, 1);
@@ -532,10 +545,9 @@
         function draw() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Dessin des étoiles (Parallaxe)
             stars.forEach(s => {
                 ctx.globalAlpha = s.opacity;
-                ctx.fillStyle = 'white';
+                ctx.fillStyle = '#ffffff';
                 ctx.beginPath();
                 ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -568,7 +580,6 @@
             });
             ctx.globalAlpha = 1.0;
 
-            // Joueur
             ctx.drawImage(images.ship, player.x, player.y, player.w, player.h);
 
             floatingTexts.forEach(t => {
@@ -599,7 +610,7 @@
             touchControls.classList.remove('hidden');
             const settings = DIFFICULTY_SETTINGS[diffSelect.value];
             meteorInterval = settings.interval;
-            score = 0; lives = 3; timeLeft = 180;
+            score = 0; lives = 3; timeLeft = TOTAL_TIME;
             scoreEl.textContent = score;
             livesEl.textContent = lives;
             meteors.length = 0; lasers.length = 0;
@@ -614,6 +625,7 @@
             stopSpaceAmbience();
             touchControls.classList.add('hidden');
             overlayTitle.textContent = reason;
+            overlayTitle.className = "text-4xl font-black text-blue-500 mb-4 tracking-widest uppercase";
             overlayMsg.innerHTML = `<div class="text-center">MISSION TERMINÉE !<br><br><b>Score Final : ${score}</b><br>Continue tes efforts !</div>`;
             startBtn.textContent = "REESSAYER";
             overlay.classList.remove('hidden');
